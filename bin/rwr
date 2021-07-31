@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path("../../Gemfile",
+  Pathname.new(__FILE__).realpath)
+
+require 'rubygems'
+require 'bundler/setup'
+
+$LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
+require 'real_world_rails/parser_factory'
+require 'real_world_rails/inspectors/inspector'
+
+def init_inspector
+  inspector_name = (ARGV.first || 'models').gsub('-', '_') + '_inspector'
+  require "real_world_rails/inspectors/#{inspector_name}"
+
+  inspector_class_name = inspector_name.capitalize.gsub(/_[a-z]/, &:upcase).gsub('_','')
+  fully_qualified_inspector_class_name = "RealWorldRails::Inspectors::#{inspector_class_name}"
+  inspector_class = Object.const_get fully_qualified_inspector_class_name
+  inspector_class.new
+end
+
+init_inspector.run
